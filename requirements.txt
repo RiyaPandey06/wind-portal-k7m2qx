@@ -1,5 +1,6 @@
-# Runtime dependencies for the Vercel serverless function (kept minimal for bundle size).
-# Docker / local dev use backend/requirements.txt instead (adds uvicorn, httpx, pytest).
 fastapi==0.115.6
+uvicorn[standard]==0.34.0
 pandas==2.2.3
 numpy==2.1.3
+httpx==0.28.1
+pytest==8.3.4
