@@ -4,7 +4,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = Path(os.getenv("DATA_DIR", ROOT / "data"))
-STATIC_DIR = Path(os.getenv("STATIC_DIR", ROOT / "backend" / "static"))
+def _find_static() -> Path:
+    """Built React app: Docker puts it in backend/static, Vercel/local builds in frontend/dist."""
+    if os.getenv("STATIC_DIR"):
+        return Path(os.environ["STATIC_DIR"])
+    for c in (ROOT / "backend" / "static", ROOT / "frontend" / "dist"):
+        if (c / "index.html").exists():
+            return c
+    return ROOT / "backend" / "static"
+
+
+STATIC_DIR = _find_static()
 
 ELEXON_BASE = "https://data.elexon.co.uk/bmrs/api/v1"
 

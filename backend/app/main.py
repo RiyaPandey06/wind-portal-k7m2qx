@@ -5,7 +5,7 @@ from functools import lru_cache
 
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -142,11 +142,22 @@ def health():
     return {"ok": True}
 
 
+@app.get("/api/_debug", include_in_schema=False)
+def debug(request: Request):
+    """What the function actually received (useful behind Vercel rewrites)."""
+    sc = request.scope
+    return {"seen_path": sc.get("_orig_path"), "seen_query": sc.get("_orig_query"),
+            "routed_path": sc["path"], "static_dir": str(config.STATIC_DIR),
+            "static_found": (config.STATIC_DIR / "index.html").exists()}
+
+
 # ------------------------------------------------------------------ static SPA
-if config.STATIC_DIR.exists():
+if (config.STATIC_DIR / "index.html").exists():
     app.mount("/assets", StaticFiles(directory=config.STATIC_DIR / "assets"), name="assets")
 
     @app.get("/{path:path}", include_in_schema=False)
     def spa(path: str):
+        if path.startswith("api/"):
+            raise HTTPException(404, "Not Found")
         f = config.STATIC_DIR / path
         return FileResponse(f if f.is_file() else config.STATIC_DIR / "index.html")

@@ -11,16 +11,7 @@ from urllib.parse import parse_qsl, urlencode
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
-from fastapi import Request  # noqa: E402
-
 from app.main import app as fastapi_app  # noqa: E402
-
-
-@fastapi_app.get("/api/_debug", include_in_schema=False)
-def _debug(request: Request):
-    s = request.scope
-    return {"seen_path": s.get("_orig_path"), "seen_query": s.get("_orig_query"),
-            "routed_path": s["path"]}
 
 
 class PathFix:
